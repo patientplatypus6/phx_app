@@ -29,15 +29,18 @@
         },
         created(){
             console.log("inside created")
-            let socket = new Socket("/socket", {params: {userToken: Date.now()}})
+            let socket = new Socket("ws://localhost:4000/socket", {params: {userToken: Date.now()}})
             socket.connect()
+
+            socket.onOpen( ev => console.log("OPEN", ev) )
+            socket.onError( ev => console.log("ERROR", ev) )
+            socket.onClose( e => console.log("CLOSE", e))
 
             this.channel = socket.channel("room:lobby", {})
             console.log('value of this.channel: ', this.channel)
             this.channel.join()
                 .receive("ok", resp => { console.log("Joined successfully in Vue", resp) })
                 .receive("error", resp => { console.log("Unable to join", resp) })
-            // this.channel.on('shout', payload => this.messages.push(payload.message))
             this.channel.on('shout', payload => this.shoutReturn(payload))
         }, 
         methods: {
